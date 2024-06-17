@@ -1,7 +1,7 @@
 package rotas
 
 import (
-	controllers "mybook-api/src/contollers"
+	controllers "mybook-api/src/controllers"
 	"net/http"
 )
 
