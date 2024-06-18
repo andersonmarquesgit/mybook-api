@@ -1,7 +1,7 @@
 package router
 
 import (
-	"mybook-api/src/router/rotas"
+	"mybook-api/src/infrastructure/router/rotas"
 
 	"github.com/gorilla/mux"
 )

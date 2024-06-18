@@ -31,4 +31,5 @@ func Carregar() {
 		os.Getenv("DB_URI"),
 		os.Getenv("DB_SERVER"),
 		os.Getenv("DB_PORT"))
+
 }
