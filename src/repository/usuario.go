@@ -24,8 +24,8 @@ type RequestStatus struct {
 	Err        error
 }
 
-func NovoRepositorio() *Repositorio {
-	return &Repositorio{banco.GetDB().Collection(os.Getenv("USER_COLLECTION"))}
+func NovoRepositorio(country string) *Repositorio {
+	return &Repositorio{banco.GetDB().Collection(country + "-" + os.Getenv("USER_COLLECTION"))}
 }
 
 func (repositorio Repositorio) Criar(usuario *models.Usuario) (*models.Usuario, RequestStatus) {
@@ -119,7 +119,7 @@ func (repositorio Repositorio) Atualizar(usuario *models.Usuario) (*models.Usuar
 			"email":        usuario.Email,
 			"senha":        usuario.Senha,
 			"nick":         usuario.Nick,
-			"atualizadoEm": time.Now().UTC().Format("2006-01-02T15:04:05.000Z"),
+			"atualizadoem": time.Now(),
 		},
 	}
 

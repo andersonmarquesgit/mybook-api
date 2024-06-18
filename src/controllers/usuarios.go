@@ -15,6 +15,7 @@ import (
 func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 	log.Println("Inserção de usuário")
 	usuarioRequest, err := ioutil.ReadAll(r.Body)
+	//country := mux.Vars(r)["country"]
 
 	if err != nil {
 		log.Fatalf("Falha ao ler o corpo da requisição: %v", err)
@@ -29,7 +30,7 @@ func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	repository := repository.NovoRepositorio()
+	repository := repository.NovoRepositorio("br")
 	_, status := repository.Criar(&usuario)
 	if status.Err != nil {
 		createResponse(w, status.StatusCode, status.Message)
@@ -40,7 +41,7 @@ func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 }
 
 func ListarUsuarios(w http.ResponseWriter, r *http.Request) {
-	repository := repository.NovoRepositorio()
+	repository := repository.NovoRepositorio("br")
 	usuarios, status := repository.Listar()
 	if status.Err != nil {
 		createResponse(w, status.StatusCode, status.Message)
@@ -52,7 +53,7 @@ func ListarUsuarios(w http.ResponseWriter, r *http.Request) {
 func BuscarUsuario(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 
-	repository := repository.NovoRepositorio()
+	repository := repository.NovoRepositorio("br")
 	usuario, status := repository.BuscarUsuario(id)
 
 	if status.Err != nil {
@@ -79,7 +80,7 @@ func AtualizarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	repository := repository.NovoRepositorio()
+	repository := repository.NovoRepositorio("br")
 	_, status := repository.Atualizar(&usuario)
 	if status.Err != nil {
 		createResponse(w, status.StatusCode, status.Message)
@@ -91,7 +92,7 @@ func AtualizarUsuario(w http.ResponseWriter, r *http.Request) {
 func DeletarUsuario(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 
-	repository := repository.NovoRepositorio()
+	repository := repository.NovoRepositorio("br")
 
 	status := repository.DeletarUsuario(id)
 
