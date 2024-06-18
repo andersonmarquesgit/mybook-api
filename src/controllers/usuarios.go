@@ -29,6 +29,7 @@ func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	repository := repository.NovoRepositorio()
 	_, status := repository.Criar(&usuario)
 	if status.Err != nil {
 		createResponse(w, status.StatusCode, status.Message)
@@ -39,6 +40,7 @@ func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 }
 
 func ListarUsuarios(w http.ResponseWriter, r *http.Request) {
+	repository := repository.NovoRepositorio()
 	usuarios, status := repository.Listar()
 	if status.Err != nil {
 		createResponse(w, status.StatusCode, status.Message)
@@ -50,6 +52,7 @@ func ListarUsuarios(w http.ResponseWriter, r *http.Request) {
 func BuscarUsuario(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 
+	repository := repository.NovoRepositorio()
 	usuario, status := repository.BuscarUsuario(id)
 
 	if status.Err != nil {
@@ -76,6 +79,7 @@ func AtualizarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	repository := repository.NovoRepositorio()
 	_, status := repository.Atualizar(&usuario)
 	if status.Err != nil {
 		createResponse(w, status.StatusCode, status.Message)
@@ -86,6 +90,8 @@ func AtualizarUsuario(w http.ResponseWriter, r *http.Request) {
 
 func DeletarUsuario(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
+
+	repository := repository.NovoRepositorio()
 
 	status := repository.DeletarUsuario(id)
 
