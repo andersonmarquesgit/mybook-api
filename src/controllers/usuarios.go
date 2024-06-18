@@ -85,7 +85,12 @@ func AtualizarUsuario(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeletarUsuario(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Deletar Usuários!"))
+	id := mux.Vars(r)["id"]
+
+	status := repository.DeletarUsuario(id)
+
+	createResponse(w, status.StatusCode, status.Message)
+
 }
 
 // Função genérica para criar uma resposta HTTP

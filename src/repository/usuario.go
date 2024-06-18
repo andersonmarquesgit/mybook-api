@@ -143,3 +143,23 @@ func Atualizar(usuario *models.Usuario) (*models.Usuario, RequestStatus) {
 
 	return usuario, RequestStatus{StatusCode: http.StatusOK}
 }
+
+func DeletarUsuario(id string) RequestStatus {
+	collection := banco.GetDB().Collection("usuarios")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	result, err := collection.DeleteOne(ctx, bson.M{"id": id})
+	if err != nil {
+		log.Fatalf("Erro ao deletar usuário no MongoDB: %v", err)
+		return RequestStatus{StatusCode: http.StatusNoContent, Message: "Usuário não encontrado", Err: err}
+	}
+
+	if result.DeletedCount == 0 {
+		return RequestStatus{StatusCode: http.StatusNoContent, Message: "Usuário não encontrado", Err: err}
+
+	}
+
+	return RequestStatus{StatusCode: http.StatusOK, Message: "Usuário deletado com sucesso!"}
+}
