@@ -84,3 +84,62 @@ func Listar() ([]models.Usuario, RequestStatus) {
 
 	return usuarios, RequestStatus{StatusCode: http.StatusOK}
 }
+
+func BuscarUsuario(id string) (models.Usuario, RequestStatus) {
+	collection := banco.GetDB().Collection("usuarios")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var usuario models.Usuario
+	err := collection.FindOne(ctx, bson.M{"id": id}).Decode(&usuario)
+	if err == mongo.ErrNoDocuments {
+		return usuario, RequestStatus{StatusCode: http.StatusNoContent, Message: "Usuário não encontrado", Err: err}
+
+	} else if err != nil {
+		log.Fatalf("Erro ao buscar usuário no MongoDB: %v", err)
+		return usuario, RequestStatus{StatusCode: http.StatusInternalServerError, Message: "Erro ao buscar usuário no MongoDB", Err: err}
+
+	}
+
+	return usuario, RequestStatus{StatusCode: http.StatusOK}
+}
+
+func Atualizar(usuario *models.Usuario) (*models.Usuario, RequestStatus) {
+	collection := banco.GetDB().Collection("usuarios")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	filter := bson.M{"id": usuario.ID}
+
+	update := bson.M{
+		"$set": bson.M{
+			"nome":         usuario.Nome,
+			"email":        usuario.Email,
+			"senha":        usuario.Senha,
+			"nick":         usuario.Nick,
+			"atualizadoEm": time.Now().UTC().Format("2006-01-02T15:04:05.000Z"),
+		},
+	}
+
+	_, err := collection.UpdateOne(ctx, filter, update)
+	if err == mongo.ErrNoDocuments {
+		return usuario, RequestStatus{StatusCode: http.StatusNoContent, Message: "Usuário não encontrado", Err: err}
+	} else if err != nil {
+		log.Fatalf("Erro ao atualizar usuário no MongoDB: %v", err)
+		return usuario, RequestStatus{StatusCode: http.StatusInternalServerError, Message: "Erro ao atualizar usuário no MongoDB", Err: err}
+	}
+
+	err = collection.FindOne(ctx, filter).Decode(&usuario)
+	if err == mongo.ErrNoDocuments {
+		return usuario, RequestStatus{StatusCode: http.StatusNoContent, Message: "Usuário não encontrado", Err: err}
+
+	} else if err != nil {
+		log.Fatalf("Erro ao buscar usuário no MongoDB: %v", err)
+		return usuario, RequestStatus{StatusCode: http.StatusInternalServerError, Message: "Erro ao buscar usuário no MongoDB", Err: err}
+
+	}
+
+	return usuario, RequestStatus{StatusCode: http.StatusOK}
+}
