@@ -45,7 +45,7 @@ func ListarUsuarios(w http.ResponseWriter, r *http.Request) {
 	repository := repository.NovoRepositorio("br")
 	usuarios, status := repository.Listar()
 	if status.Err != nil {
-		response.JSON(w, status.StatusCode, status.Message)
+		response.Erro(w, status.StatusCode, status.Err)
 	} else {
 		response.JSON(w, status.StatusCode, usuarios)
 	}
@@ -58,7 +58,7 @@ func BuscarUsuario(w http.ResponseWriter, r *http.Request) {
 	usuario, status := repository.BuscarUsuario(id)
 
 	if status.Err != nil {
-		response.JSON(w, status.StatusCode, status.Message)
+		response.Erro(w, status.StatusCode, status.Err)
 	} else {
 		response.JSON(w, status.StatusCode, usuario)
 	}
