@@ -2,8 +2,11 @@ package models
 
 import (
 	"errors"
+	"mybook-api/src/infrastructure/security"
 	"strings"
 	"time"
+
+	"github.com/badoux/checkmail"
 )
 
 // Usuario representa um usuário utilizando a rede social
@@ -19,11 +22,14 @@ type Usuario struct {
 
 // Preparar vai chamar os métodos validar e formatar
 func (usuario *Usuario) Preparar() error {
-	if erro := usuario.validar(); erro != nil {
-		return erro
+	if err := usuario.validar(); err != nil {
+		return err
 	}
 
-	usuario.formatar()
+	if err := usuario.formatar(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -31,12 +37,19 @@ func (usuario *Usuario) validar() error {
 	if usuario.Nome == "" {
 		return errors.New("O nome é obrigatório e não pode estar em branco")
 	}
+
 	if usuario.Nick == "" {
 		return errors.New("O nick é obrigatório e não pode estar em branco")
 	}
+
 	if usuario.Email == "" {
-		return errors.New("O email é obrigatório e não pode estar em branco")
+		return errors.New("O e-mail é obrigatório e não pode estar em branco")
 	}
+
+	if err := checkmail.ValidateFormat(usuario.Email); err != nil {
+		return errors.New("O e-mail inserido é inválido")
+	}
+
 	if usuario.Senha == "" {
 		return errors.New("A senha é obrigatório e não pode estar em branco")
 	}
@@ -44,8 +57,16 @@ func (usuario *Usuario) validar() error {
 	return nil
 }
 
-func (usuario *Usuario) formatar() {
+func (usuario *Usuario) formatar() error {
 	usuario.Nome = strings.TrimSpace(usuario.Nome)
 	usuario.Nick = strings.TrimSpace(usuario.Nick)
 	usuario.Email = strings.TrimSpace(usuario.Email)
+
+	senhaComHash, err := security.Hash(usuario.Senha)
+	if err != nil {
+		return err
+	}
+
+	usuario.Senha = string(senhaComHash)
+	return nil
 }
