@@ -31,6 +31,11 @@ func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err = usuario.Preparar(); err != nil {
+		response.Erro(w, http.StatusBadRequest, err)
+		return
+	}
+
 	repository := repository.NovoRepositorio("br")
 	_, status := repository.Criar(&usuario)
 	if status.Err != nil {
