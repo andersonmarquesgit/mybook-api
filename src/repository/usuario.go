@@ -107,6 +107,23 @@ func (repositorio Repositorio) BuscarUsuario(id string) (models.Usuario, Request
 	return usuario, RequestStatus{StatusCode: http.StatusOK}
 }
 
+func (repositorio Repositorio) BuscarUsuarioPorEmail(email string) (models.Usuario, RequestStatus) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var usuario models.Usuario
+	err := repositorio.collection.FindOne(ctx, bson.M{"email": email}).Decode(&usuario)
+	if err == mongo.ErrNoDocuments {
+		return usuario, RequestStatus{StatusCode: http.StatusNoContent, Message: "Usuário não encontrado", Err: err}
+
+	} else if err != nil {
+		log.Fatalf("Erro ao buscar usuário no MongoDB: %v", err)
+		return usuario, RequestStatus{StatusCode: http.StatusInternalServerError, Message: "Erro ao buscar usuário no MongoDB", Err: err}
+	}
+
+	return usuario, RequestStatus{StatusCode: http.StatusOK}
+}
+
 func (repositorio Repositorio) Atualizar(usuario *models.Usuario) (*models.Usuario, RequestStatus) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
