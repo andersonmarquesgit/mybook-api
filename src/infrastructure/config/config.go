@@ -12,6 +12,8 @@ import (
 var (
 	DBStringConnection = ""
 	Port               = 0
+	SecretKey          []byte
+	Collection         string
 )
 
 // Carregar vai inicializar as variáveis de ambiente
@@ -31,5 +33,9 @@ func Carregar() {
 		os.Getenv("DB_URI"),
 		os.Getenv("DB_SERVER"),
 		os.Getenv("DB_PORT"))
+
+	SecretKey = []byte(os.Getenv("SECRET_KEY"))
+
+	Collection = os.Getenv("USER_COLLECTION")
 
 }

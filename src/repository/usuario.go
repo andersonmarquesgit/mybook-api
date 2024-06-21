@@ -4,9 +4,9 @@ import (
 	"context"
 	"log"
 	"mybook-api/src/infrastructure/banco"
+	"mybook-api/src/infrastructure/config"
 	"mybook-api/src/models"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -25,7 +25,7 @@ type RequestStatus struct {
 }
 
 func NovoRepositorio(country string) *Repositorio {
-	return &Repositorio{banco.GetDB().Collection(country + "-" + os.Getenv("USER_COLLECTION"))}
+	return &Repositorio{banco.GetDB().Collection(country + "-" + config.Collection)}
 }
 
 func (repositorio Repositorio) Criar(usuario *models.Usuario) (*models.Usuario, RequestStatus) {

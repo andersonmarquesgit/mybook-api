@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"mybook-api/src/infrastructure/autenticacao"
 	"mybook-api/src/infrastructure/security"
 	"mybook-api/src/models"
 	"mybook-api/src/repository"
@@ -37,6 +38,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.JSON(w, http.StatusCreated, "Você está logado, parabéns!")
+	token, _ := autenticacao.CriarToken(usuarioDoBanco.ID)
+	response.JSON(w, http.StatusCreated, token)
 
 }
