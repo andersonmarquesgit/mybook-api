@@ -13,7 +13,7 @@ var (
 	DBStringConnection = ""
 	Port               = 0
 	SecretKey          []byte
-	Collection         string
+	Collection         map[string]string
 )
 
 // Carregar vai inicializar as variáveis de ambiente
@@ -36,6 +36,7 @@ func Carregar() {
 
 	SecretKey = []byte(os.Getenv("SECRET_KEY"))
 
-	Collection = os.Getenv("USER_COLLECTION")
-
+	Collection = map[string]string{}
+	Collection["users"] = os.Getenv("USER_COLLECTION")
+	Collection["followers"] = os.Getenv("FOLLOWERS_COLLECTION")
 }
