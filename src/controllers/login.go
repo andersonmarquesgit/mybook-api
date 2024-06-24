@@ -7,7 +7,7 @@ import (
 	"mybook-api/src/infrastructure/autenticacao"
 	"mybook-api/src/infrastructure/security"
 	"mybook-api/src/models"
-	"mybook-api/src/repository"
+	repository "mybook-api/src/repository/users"
 	"mybook-api/src/response"
 	"net/http"
 )
@@ -26,7 +26,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	repository := repository.NovoRepositorio("br")
+	repository := repository.UsersRepository("br")
 	usuarioDoBanco, status := repository.BuscarUsuarioPorEmail(usuarioLogin.Email)
 
 	if status.Err != nil {
