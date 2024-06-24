@@ -110,6 +110,16 @@ func AtualizarUsuario(w http.ResponseWriter, r *http.Request) {
 func DeletarUsuario(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 
+	usuarioIDNoToken, err := autenticacao.ExtrairUsuarioID(r)
+	if err != nil {
+		response.Erro(w, http.StatusUnauthorized, err)
+	}
+
+	if id != usuarioIDNoToken {
+		response.Erro(w, http.StatusForbidden, errors.New("Não é possível excluir um usuário diferente do seu"))
+		return
+	}
+
 	repository := repository.NovoRepositorio("br")
 
 	status := repository.DeletarUsuario(id)
