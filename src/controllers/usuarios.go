@@ -8,7 +8,7 @@ import (
 	"mybook-api/src/infrastructure/autenticacao"
 	"mybook-api/src/models"
 	"mybook-api/src/repository/followers"
-	repository "mybook-api/src/repository/users"
+	"mybook-api/src/repository/users"
 	"mybook-api/src/response"
 	"net/http"
 	"time"
@@ -39,7 +39,7 @@ func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	repository := repository.UsersRepository("br")
+	repository := users.UsersRepository("br")
 	_, status := repository.Criar(&usuario)
 	if status.Err != nil {
 		response.JSON(w, status.StatusCode, status.Message)
@@ -50,7 +50,7 @@ func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 }
 
 func ListarUsuarios(w http.ResponseWriter, r *http.Request) {
-	repository := repository.UsersRepository("br")
+	repository := users.UsersRepository("br")
 	usuarios, status := repository.Listar()
 	if status.Err != nil {
 		response.Erro(w, status.StatusCode, status.Err)
@@ -62,7 +62,7 @@ func ListarUsuarios(w http.ResponseWriter, r *http.Request) {
 func BuscarUsuario(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 
-	repository := repository.UsersRepository("br")
+	repository := users.UsersRepository("br")
 	usuario, status := repository.BuscarUsuario(id)
 
 	if status.Err != nil {
@@ -99,7 +99,7 @@ func AtualizarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	repository := repository.UsersRepository("br")
+	repository := users.UsersRepository("br")
 	_, status := repository.Atualizar(&usuario)
 	if status.Err != nil {
 		response.JSON(w, status.StatusCode, status.Message)
@@ -121,7 +121,7 @@ func DeletarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	repository := repository.UsersRepository("br")
+	repository := users.UsersRepository("br")
 
 	status := repository.DeletarUsuario(id)
 
@@ -142,7 +142,7 @@ func FollowUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userRepository := repository.UsersRepository("br")
+	userRepository := users.UsersRepository("br")
 	if _, status := userRepository.BuscarUsuario(id); status.Err != nil {
 		response.Erro(w, http.StatusBadRequest, status.Err)
 		return
@@ -176,7 +176,7 @@ func UnfollowUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userRepository := repository.UsersRepository("br")
+	userRepository := users.UsersRepository("br")
 	if _, status := userRepository.BuscarUsuario(id); status.Err != nil {
 		response.Erro(w, http.StatusBadRequest, status.Err)
 		return
