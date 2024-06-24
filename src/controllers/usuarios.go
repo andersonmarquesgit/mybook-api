@@ -128,7 +128,7 @@ func DeletarUsuario(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func SeguirUsuario(w http.ResponseWriter, r *http.Request) {
+func FollowUser(w http.ResponseWriter, r *http.Request) {
 	seguidorID, err := autenticacao.ExtrairUsuarioID(r)
 	if err != nil {
 		response.Erro(w, http.StatusUnauthorized, err)
@@ -160,5 +160,38 @@ func SeguirUsuario(w http.ResponseWriter, r *http.Request) {
 	} else {
 		response.JSON(w, status.StatusCode, *followers)
 	}
+}
 
+func UnfollowUser(w http.ResponseWriter, r *http.Request) {
+	seguidorID, err := autenticacao.ExtrairUsuarioID(r)
+	if err != nil {
+		response.Erro(w, http.StatusUnauthorized, err)
+	}
+
+	id := mux.Vars(r)["id"]
+
+	if id == seguidorID {
+		response.Erro(w, http.StatusForbidden, errors.New("Não é possível deixar de seguir você mesmo"))
+		return
+	}
+
+	userRepository := repository.NovoRepositorio("br")
+	if _, status := userRepository.BuscarUsuario(id); status.Err != nil {
+		response.Erro(w, http.StatusBadRequest, status.Err)
+		return
+	}
+
+	if _, status := userRepository.BuscarUsuario(seguidorID); status.Err != nil {
+		response.JSON(w, http.StatusBadRequest, status.Err)
+		return
+	}
+
+	followersRepository := repository.FollowersRepository("br")
+	followers, status := followersRepository.UnfollowUsuario(&id, &seguidorID)
+
+	if status.Err != nil {
+		response.Erro(w, status.StatusCode, status.Err)
+	} else {
+		response.JSON(w, status.StatusCode, *followers)
+	}
 }

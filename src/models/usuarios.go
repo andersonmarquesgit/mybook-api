@@ -16,7 +16,6 @@ type Usuario struct {
 	Nick         string    `json:"nick,omitempty"`
 	Email        string    `json:"email,omitempty"`
 	Senha        string    `json:"senha,omitempty"`
-	Seguidores   []string  `json:"seguidores,omitempty"`
 	CriadoEm     time.Time `json:"criadoEm,omitempty"`
 	AtualizadoEm time.Time `json:"atualizadoEm,omitempty"`
 }

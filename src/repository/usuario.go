@@ -184,6 +184,7 @@ func (repositorio Repositorio) DeletarUsuario(id string) RequestStatus {
 	return RequestStatus{StatusCode: http.StatusOK, Message: "Usuário deletado com sucesso!"}
 }
 
+// TODO refatorar repositorio de seguidores
 func (repositorio Repositorio) SeguirUsuario(userID *string, seguidorID *string) (*models.Seguidores, RequestStatus) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -221,6 +222,47 @@ func (repositorio Repositorio) SeguirUsuario(userID *string, seguidorID *string)
 		log.Fatalf("Erro ao buscar usuário no MongoDB: %v", err)
 		return &followers, RequestStatus{StatusCode: http.StatusInternalServerError, Message: "Erro ao buscar usuário no MongoDB", Err: err}
 
+	}
+
+	return &followers, RequestStatus{StatusCode: http.StatusOK}
+}
+
+// TODO refatorar repositorio de seguidores
+func (repositorio Repositorio) UnfollowUsuario(userID *string, seguidorID *string) (*models.Seguidores, RequestStatus) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	filter := bson.M{"userid": userID}
+
+	update := bson.M{
+		"$pull": bson.M{
+			"seguidores": seguidorID,
+		},
+		"$set": bson.M{
+			"atualizadoem": time.Now(),
+		},
+	}
+
+	result, err := repositorio.collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return nil, RequestStatus{StatusCode: http.StatusInternalServerError, Message: "Erro ao atualizar seguidores do usuário no MongoDB", Err: err}
+	}
+
+	if result.MatchedCount == 0 {
+		log.Printf("Nenhum documento de seguidores encontrado para o usuário %v", *userID)
+	} else {
+		log.Printf("Seguidores do usuário %v atualizados com sucesso", *userID)
+	}
+
+	var followers models.Seguidores
+
+	err = repositorio.collection.FindOne(ctx, filter).Decode(&followers)
+	if err == mongo.ErrNoDocuments {
+		return &followers, RequestStatus{StatusCode: http.StatusNoContent, Message: "Usuário não encontrado", Err: err}
+
+	} else if err != nil {
+		log.Fatalf("Erro ao buscar usuário no MongoDB: %v", err)
+		return &followers, RequestStatus{StatusCode: http.StatusInternalServerError, Message: "Erro ao buscar usuário no MongoDB", Err: err}
 	}
 
 	return &followers, RequestStatus{StatusCode: http.StatusOK}
