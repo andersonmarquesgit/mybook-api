@@ -2,8 +2,10 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"log"
+	"mybook-api/src/infrastructure/autenticacao"
 	"mybook-api/src/models"
 	"mybook-api/src/repository"
 	"mybook-api/src/response"
@@ -78,6 +80,16 @@ func AtualizarUsuario(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("Falha ao ler o corpo da requisição: %v", err)
 		response.JSON(w, http.StatusBadRequest, "Falha ao ler o corpo da requisição")
+		return
+	}
+
+	usuarioIDNoToken, err := autenticacao.ExtrairUsuarioID(r)
+	if err != nil {
+		response.Erro(w, http.StatusUnauthorized, err)
+	}
+
+	if usuario.ID != usuarioIDNoToken {
+		response.Erro(w, http.StatusForbidden, errors.New("Não é possível atualizar um usuário diferente do seu"))
 		return
 	}
 
