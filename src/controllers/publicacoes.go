@@ -26,7 +26,7 @@ func CriarPublicacoes(w http.ResponseWriter, r *http.Request) {
 	var publication models.Publication
 	publication.AuthorID = userID
 	if err = json.Unmarshal(request, &publication); err != nil {
-		response.JSON(w, http.StatusBadRequest, "Erro ao converter o usuário para struct")
+		response.JSON(w, http.StatusBadRequest, "Erro ao converter o request para struct")
 		return
 	}
 
