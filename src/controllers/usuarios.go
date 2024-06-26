@@ -7,6 +7,7 @@ import (
 	"log"
 	"mybook-api/src/infrastructure/autenticacao"
 	"mybook-api/src/models"
+	"mybook-api/src/presentation"
 	"mybook-api/src/repository/followers"
 	"mybook-api/src/repository/users"
 	"mybook-api/src/response"
@@ -159,7 +160,7 @@ func FollowUser(w http.ResponseWriter, r *http.Request) {
 	if status.Err != nil {
 		response.Erro(w, status.StatusCode, status.Err)
 	} else {
-		response.JSON(w, status.StatusCode, *followers)
+		response.JSON(w, status.StatusCode, presentation.NewFollowersResponse(*followers))
 	}
 }
 
@@ -193,7 +194,7 @@ func UnfollowUser(w http.ResponseWriter, r *http.Request) {
 	if status.Err != nil {
 		response.Erro(w, status.StatusCode, status.Err)
 	} else {
-		response.JSON(w, status.StatusCode, *followers)
+		response.JSON(w, status.StatusCode, presentation.NewFollowersResponse(*followers))
 	}
 }
 
@@ -201,26 +202,24 @@ func Followers(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 
 	followersRepository := followers.FollowersRepository("br")
-	usuario, status := followersRepository.FindFollowers(id)
+	followers, status := followersRepository.FindFollowers(id)
 
 	if status.Err != nil {
 		response.Erro(w, status.StatusCode, status.Err)
 	} else {
-		response.JSON(w, status.StatusCode, usuario)
+		response.JSON(w, status.StatusCode, presentation.NewFollowersResponse(followers))
 	}
 }
 
 func Following(w http.ResponseWriter, r *http.Request) {
-	// id := mux.Vars(r)["id"]
+	id := mux.Vars(r)["id"]
 
-	// followersRepository := followers.FollowersRepository("br")
-	// usuario, status := followersRepository.FindFollowing(id)
+	followersRepository := followers.FollowersRepository("br")
+	following, status := followersRepository.FindFollowing(id)
 
-	// if status.Err != nil {
-	// 	response.Erro(w, status.StatusCode, status.Err)
-	// } else {
-	// 	response.JSON(w, status.StatusCode, usuario)
-	// }
-
-	log.Println("Buscando quem o usuário segue!")
+	if status.Err != nil {
+		response.Erro(w, status.StatusCode, status.Err)
+	} else {
+		response.JSON(w, status.StatusCode, presentation.NewFollowingResponse(following))
+	}
 }

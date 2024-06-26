@@ -12,20 +12,14 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-type Token struct {
-	AccessToken string `json:"access_token,omitempty"`
-}
-
-func CriarToken(usuarioID string) (Token, error) {
+func CriarToken(usuarioID string) (string, error) {
 	permissoes := jwt.MapClaims{}
 	permissoes["authorized"] = true
 	permissoes["exp"] = time.Now().Add(time.Hour * 6).Unix()
 	permissoes["usuarioId"] = usuarioID
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, permissoes)
-	accessTokenString, err := accessToken.SignedString([]byte(config.SecretKey))
-	token := Token{AccessToken: accessTokenString}
-	return token, err
+	return accessToken.SignedString([]byte(config.SecretKey))
 }
 
 func ValidarToken(r *http.Request) error {

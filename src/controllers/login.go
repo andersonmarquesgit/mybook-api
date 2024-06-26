@@ -7,6 +7,7 @@ import (
 	"mybook-api/src/infrastructure/autenticacao"
 	"mybook-api/src/infrastructure/security"
 	"mybook-api/src/models"
+	"mybook-api/src/presentation"
 	repository "mybook-api/src/repository/users"
 	"mybook-api/src/response"
 	"net/http"
@@ -38,12 +39,13 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := autenticacao.CriarToken(usuarioDoBanco.ID)
+	accessToken, err := autenticacao.CriarToken(usuarioDoBanco.ID)
 	if err != nil {
 		response.Erro(w, http.StatusInternalServerError, err)
 		return
 	}
 
+	token := presentation.NewTokenResponse(accessToken)
 	response.JSON(w, http.StatusCreated, token)
 
 }

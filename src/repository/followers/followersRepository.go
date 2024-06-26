@@ -138,6 +138,23 @@ func (repositorio Repositorio) FindFollowers(id string) (models.Seguidores, Requ
 	return usuario, RequestStatus{StatusCode: http.StatusOK}
 }
 
+func (repositorio Repositorio) FindFollowing(id string) (models.Seguindo, RequestStatus) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var usuario models.Seguindo
+	err := repositorio.followingCollection.FindOne(ctx, bson.M{"userid": id}).Decode(&usuario)
+	if err == mongo.ErrNoDocuments {
+		return usuario, RequestStatus{StatusCode: http.StatusNoContent, Message: "Usuário não encontrado", Err: err}
+
+	} else if err != nil {
+		log.Fatalf("Erro ao buscar usuário no MongoDB: %v", err)
+		return usuario, RequestStatus{StatusCode: http.StatusInternalServerError, Message: "Erro ao buscar usuário no MongoDB", Err: err}
+	}
+
+	return usuario, RequestStatus{StatusCode: http.StatusOK}
+}
+
 func (repositorio Repositorio) atualizarSeguidores(ctx context.Context, userID *string, seguidorID *string) error {
 	collection := repositorio.followersCollection
 
