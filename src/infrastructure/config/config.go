@@ -40,5 +40,6 @@ func Carregar() {
 	Collection["users"] = os.Getenv("USER_COLLECTION")
 	Collection["followers"] = os.Getenv("FOLLOWERS_COLLECTION")
 	Collection["following"] = os.Getenv("FOLLOWING_COLLECTION")
+	Collection["publications"] = os.Getenv("PUBLICATIONS_COLLECTION")
 
 }
