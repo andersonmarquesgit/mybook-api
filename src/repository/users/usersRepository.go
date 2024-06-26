@@ -135,7 +135,6 @@ func (repositorio Repositorio) Atualizar(usuario *models.Usuario) (*models.Usuar
 		"$set": bson.M{
 			"nome":         usuario.Nome,
 			"email":        usuario.Email,
-			"senha":        usuario.Senha,
 			"nick":         usuario.Nick,
 			"atualizadoem": time.Now(),
 		},
@@ -177,4 +176,55 @@ func (repositorio Repositorio) DeletarUsuario(id string) RequestStatus {
 	}
 
 	return RequestStatus{StatusCode: http.StatusOK, Message: "Usuário deletado com sucesso!"}
+}
+
+func (repositorio Repositorio) FindPassword(userID string) (string, RequestStatus) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var result struct {
+		Senha string `bson:"senha"`
+	}
+
+	filter := bson.M{"id": userID}
+	err := repositorio.collection.FindOne(ctx, filter).Decode(&result)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return "", RequestStatus{StatusCode: http.StatusNoContent, Message: "Usuário não encontrado", Err: err}
+		}
+		return "", RequestStatus{StatusCode: http.StatusInternalServerError, Message: "Erro ao buscar usuário no MongoDB", Err: err}
+	}
+
+	if result.Senha == "" {
+		return "", RequestStatus{StatusCode: http.StatusNotFound, Message: "Usuário não encontrado"}
+	}
+
+	return result.Senha, RequestStatus{StatusCode: http.StatusOK}
+}
+
+func (repositorio Repositorio) UpdatePassword(userID string, novaSenha string) RequestStatus {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	filter := bson.M{"id": userID}
+	update := bson.M{
+		"$set": bson.M{
+			"senha":        string(novaSenha),
+			"atualizadoem": time.Now(),
+		},
+	}
+
+	result, err := repositorio.collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return RequestStatus{StatusCode: http.StatusNotFound, Message: "Usuário não encontrado", Err: err}
+		}
+		return RequestStatus{StatusCode: http.StatusInternalServerError, Message: "Erro ao atualizar senha do usuário no MongoDB", Err: err}
+	}
+
+	if result.MatchedCount == 0 {
+		return RequestStatus{StatusCode: http.StatusNotFound, Message: "Usuário não encontrado"}
+	}
+
+	return RequestStatus{StatusCode: http.StatusOK, Message: "Senha atualizada com sucesso"}
 }

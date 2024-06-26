@@ -60,4 +60,10 @@ var rotasUsuarios = []Rota{
 		Funcao:             controllers.Following,
 		RequerAutenticacao: true,
 	},
+	{
+		URI:                "/usuarios/{id}/update-password",
+		Metodo:             http.MethodPost,
+		Funcao:             controllers.UpdatePassword,
+		RequerAutenticacao: true,
+	},
 }

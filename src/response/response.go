@@ -6,18 +6,18 @@ import (
 	"net/http"
 )
 
-// JSON retornar uma resposta Json para a requisição
+// JSON retorna uma resposta JSON para a requisição
 func JSON(w http.ResponseWriter, statusCode int, body interface{}) {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
 
 	if body != nil {
 		if err := json.NewEncoder(w).Encode(body); err != nil {
 			log.Printf("Erro ao codificar a resposta JSON: %v", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Erro interno do servidor"))
+			http.Error(w, "Erro interno do servidor", http.StatusInternalServerError)
+			return
 		}
 	} else {
+		w.WriteHeader(statusCode)
 		w.Write([]byte("{}"))
 	}
 }
@@ -27,5 +27,14 @@ func Erro(w http.ResponseWriter, statusCode int, err error) {
 		Erro string `json:"erro"`
 	}{
 		Erro: err.Error(),
+	})
+}
+
+// Sucesso retorna uma resposta JSON com mensagem de sucesso
+func Sucesso(w http.ResponseWriter, statusCode int, message string) {
+	JSON(w, statusCode, struct {
+		Mensagem string `json:"mensagem"`
+	}{
+		Mensagem: message,
 	})
 }

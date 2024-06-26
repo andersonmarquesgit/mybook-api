@@ -6,13 +6,13 @@ import (
 	"io/ioutil"
 	"log"
 	"mybook-api/src/infrastructure/autenticacao"
+	"mybook-api/src/infrastructure/security"
 	"mybook-api/src/models"
 	"mybook-api/src/presentation"
 	"mybook-api/src/repository/followers"
 	"mybook-api/src/repository/users"
 	"mybook-api/src/response"
 	"net/http"
-	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -76,7 +76,6 @@ func BuscarUsuario(w http.ResponseWriter, r *http.Request) {
 func AtualizarUsuario(w http.ResponseWriter, r *http.Request) {
 	var usuario models.Usuario
 	usuario.ID = mux.Vars(r)["id"]
-	usuario.AtualizadoEm = time.Now()
 	usuarioRequest, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
@@ -222,4 +221,52 @@ func Following(w http.ResponseWriter, r *http.Request) {
 	} else {
 		response.JSON(w, status.StatusCode, presentation.NewFollowingResponse(following))
 	}
+}
+
+func UpdatePassword(w http.ResponseWriter, r *http.Request) {
+	usuarioIDNoToken, err := autenticacao.ExtrairUsuarioID(r)
+	if err != nil {
+		response.Erro(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	userID := mux.Vars(r)["id"]
+
+	if userID != usuarioIDNoToken {
+		response.Erro(w, http.StatusForbidden, errors.New("Não é possível atualizar a senha de outro usuário"))
+		return
+	}
+
+	var updatePassword models.Senha
+	updatePasswordRequest, err := ioutil.ReadAll(r.Body)
+	if err = json.Unmarshal(updatePasswordRequest, &updatePassword); err != nil {
+		response.Erro(w, http.StatusBadRequest, err)
+		return
+	}
+
+	userRepository := users.UsersRepository("br")
+	senhaSalvaNoBanco, status := userRepository.FindPassword(userID)
+
+	if status.Err != nil {
+		response.Erro(w, status.StatusCode, status.Err)
+		return
+	}
+
+	if err = security.VerificarSenha(senhaSalvaNoBanco, updatePassword.Atual); err != nil {
+		response.Erro(w, http.StatusUnauthorized, errors.New("A senha atual não condiz com a senha salva no banco"))
+		return
+	}
+
+	senhaComHash, err := security.Hash(updatePassword.Nova)
+	if err != nil {
+		response.Erro(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if status = userRepository.UpdatePassword(userID, string(senhaComHash)); err != nil {
+		response.Erro(w, status.StatusCode, status.Err)
+		return
+	}
+
+	response.Sucesso(w, status.StatusCode, status.Message)
 }
