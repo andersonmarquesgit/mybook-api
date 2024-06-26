@@ -154,7 +154,7 @@ func FollowUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	followersRepository := followers.FollowersRepository("br")
-	followers, status := followersRepository.SeguirUsuario(&id, &seguidorID)
+	followers, _, status := followersRepository.FollowUsuario(&id, &seguidorID)
 
 	if status.Err != nil {
 		response.Erro(w, status.StatusCode, status.Err)
@@ -188,7 +188,7 @@ func UnfollowUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	followersRepository := followers.FollowersRepository("br")
-	followers, status := followersRepository.UnfollowUsuario(&id, &seguidorID)
+	followers, _, status := followersRepository.UnfollowUsuario(&id, &seguidorID)
 
 	if status.Err != nil {
 		response.Erro(w, status.StatusCode, status.Err)
@@ -208,4 +208,19 @@ func Followers(w http.ResponseWriter, r *http.Request) {
 	} else {
 		response.JSON(w, status.StatusCode, usuario)
 	}
+}
+
+func Following(w http.ResponseWriter, r *http.Request) {
+	// id := mux.Vars(r)["id"]
+
+	// followersRepository := followers.FollowersRepository("br")
+	// usuario, status := followersRepository.FindFollowing(id)
+
+	// if status.Err != nil {
+	// 	response.Erro(w, status.StatusCode, status.Err)
+	// } else {
+	// 	response.JSON(w, status.StatusCode, usuario)
+	// }
+
+	log.Println("Buscando quem o usuário segue!")
 }
