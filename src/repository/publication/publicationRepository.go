@@ -74,3 +74,38 @@ func (repositorio Repositorio) BuscarPublicacao(id string) (models.Publication, 
 	return publication, RequestStatus{StatusCode: http.StatusOK}
 
 }
+
+func (repositorio Repositorio) BuscarPublicacoes() ([]models.Publication, RequestStatus) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cursor, err := repositorio.collection.Find(ctx, bson.M{})
+	if err != nil {
+		log.Fatalf("Erro ao buscar publicações no MongoDB: %v", err)
+		return nil, RequestStatus{StatusCode: http.StatusInternalServerError, Message: "Erro ao buscar publicações no MongoDB", Err: err}
+	}
+
+	defer cursor.Close(ctx)
+
+	var publications []models.Publication
+	for cursor.Next(ctx) {
+		var publication models.Publication
+		if err := cursor.Decode(&publication); err != nil {
+			log.Fatalf("Erro ao decodificar usuário: %v", err)
+			return nil, RequestStatus{StatusCode: http.StatusInternalServerError, Message: "Erro ao decodificar publicação", Err: err}
+		}
+		publications = append(publications, publication)
+	}
+
+	if err := cursor.Err(); err != nil {
+		log.Fatalf("Erro durante a iteração do cursor: %v", err)
+		return nil, RequestStatus{StatusCode: http.StatusInternalServerError, Message: "Erro durante a iteração do cursor", Err: err}
+	}
+
+	if publications == nil {
+		log.Println("Nenhuma publicação encontrada")
+		return publications, RequestStatus{StatusCode: http.StatusNoContent, Message: "Nenhuma publicação encontrada"}
+	}
+
+	return publications, RequestStatus{StatusCode: http.StatusOK}
+}

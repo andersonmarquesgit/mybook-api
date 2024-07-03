@@ -46,7 +46,15 @@ func CriarPublicacoes(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-func BuscarPublicacoes(w http.ResponseWriter, r *http.Request) {}
+func BuscarPublicacoes(w http.ResponseWriter, r *http.Request) {
+	repository := publications.PublicationRepository("br")
+	publications, status := repository.BuscarPublicacoes()
+	if status.Err != nil {
+		response.Erro(w, status.StatusCode, status.Err)
+	} else {
+		response.JSON(w, status.StatusCode, publications)
+	}
+}
 
 func BuscarPublicacao(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
