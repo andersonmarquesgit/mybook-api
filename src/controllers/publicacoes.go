@@ -8,6 +8,8 @@ import (
 	publications "mybook-api/src/repository/publication"
 	"mybook-api/src/response"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func CriarPublicacoes(w http.ResponseWriter, r *http.Request) {
@@ -30,6 +32,11 @@ func CriarPublicacoes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err = publication.Preparar(); err != nil {
+		response.Erro(w, http.StatusBadRequest, err)
+		return
+	}
+
 	repository := publications.PublicationRepository("br")
 	publicationCreated, status := repository.CriarPublicacoes(&publication)
 	if status.Err != nil {
@@ -39,7 +46,20 @@ func CriarPublicacoes(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-func BuscarPublicacoes(w http.ResponseWriter, r *http.Request)   {}
-func BuscarPublicacao(w http.ResponseWriter, r *http.Request)    {}
+func BuscarPublicacoes(w http.ResponseWriter, r *http.Request) {}
+
+func BuscarPublicacao(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+
+	repository := publications.PublicationRepository("br")
+	publication, status := repository.BuscarPublicacao(id)
+
+	if status.Err != nil {
+		response.Erro(w, status.StatusCode, status.Err)
+	} else {
+		response.JSON(w, status.StatusCode, publication)
+	}
+}
+
 func AtualizarPublicacao(w http.ResponseWriter, r *http.Request) {}
 func DeletarPublicacao(w http.ResponseWriter, r *http.Request)   {}

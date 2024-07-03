@@ -55,3 +55,22 @@ func (repositorio Repositorio) CriarPublicacoes(publication *models.Publication)
 	log.Println("Publicação inserida com sucesso!")
 	return publication, RequestStatus{StatusCode: http.StatusCreated, Message: "Publicação inserida com sucesso!"}
 }
+
+func (repositorio Repositorio) BuscarPublicacao(id string) (models.Publication, RequestStatus) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var publication models.Publication
+
+	err := repositorio.collection.FindOne(ctx, bson.M{"id": id}).Decode(&publication)
+	if err == mongo.ErrNoDocuments {
+		return publication, RequestStatus{StatusCode: http.StatusNoContent, Message: "Publicação não encontrada", Err: err}
+
+	} else if err != nil {
+		log.Fatalf("Erro ao buscar publicação no MongoDB: %v", err)
+		return publication, RequestStatus{StatusCode: http.StatusInternalServerError, Message: "Erro ao buscar publicação no MongoDB", Err: err}
+	}
+
+	return publication, RequestStatus{StatusCode: http.StatusOK}
+
+}
