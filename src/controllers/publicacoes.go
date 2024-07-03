@@ -47,8 +47,14 @@ func CriarPublicacoes(w http.ResponseWriter, r *http.Request) {
 
 }
 func BuscarPublicacoes(w http.ResponseWriter, r *http.Request) {
+	userID, err := autenticacao.ExtrairUsuarioID(r)
+	if err != nil {
+		response.Erro(w, http.StatusUnauthorized, err)
+		return
+	}
+
 	repository := publications.PublicationRepository("br")
-	publications, status := repository.BuscarPublicacoes()
+	publications, status := repository.BuscarPublicacoes(userID)
 	if status.Err != nil {
 		response.Erro(w, status.StatusCode, status.Err)
 	} else {

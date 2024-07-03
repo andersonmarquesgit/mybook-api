@@ -75,11 +75,11 @@ func (repositorio Repositorio) BuscarPublicacao(id string) (models.Publication, 
 
 }
 
-func (repositorio Repositorio) BuscarPublicacoes() ([]models.Publication, RequestStatus) {
+func (repositorio Repositorio) BuscarPublicacoes(userID string) ([]models.Publication, RequestStatus) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	cursor, err := repositorio.collection.Find(ctx, bson.M{})
+	cursor, err := repositorio.collection.Find(ctx, bson.M{"authorid": userID})
 	if err != nil {
 		log.Fatalf("Erro ao buscar publicações no MongoDB: %v", err)
 		return nil, RequestStatus{StatusCode: http.StatusInternalServerError, Message: "Erro ao buscar publicações no MongoDB", Err: err}
